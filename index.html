@@ -1,37 +1,271 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Task Manager</title>
-  <link rel="stylesheet" href="style.css"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Store</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#6988b7;
+}
+
+.navbar{
+    background:#11254f;
+    color:white;
+    padding:18px 40px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.nav-links a{
+    color:white;
+    text-decoration:none;
+    margin-left:20px;
+}
+
+.container{
+    width:95%;
+    margin:20px auto;
+}
+
+.search{
+    width:100%;
+    padding:12px;
+    border:1px solid #ddd;
+    border-radius:6px;
+    margin-bottom:20px;
+}
+
+.form{
+    background:white;
+    padding:20px;
+    border-radius:8px;
+    margin-bottom:20px;
+}
+
+.form h3{
+    margin-bottom:15px;
+}
+
+.form-row{
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.form input{
+    flex:1;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+.add-btn{
+    background:#322f6a;
+    color:white;
+    border:none;
+    padding:10px 20px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.products-title{
+    margin:20px 0;
+}
+
+.products{
+    display:flex;
+    gap:20px;
+    flex-wrap:wrap;
+}
+
+.card{
+    background:white;
+    width:220px;
+    padding:15px;
+    border-radius:10px;
+    text-align:center;
+    box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+
+.card img{
+    width:100%;
+    height:150px;
+    object-fit:contain;
+}
+
+.card h4{
+    margin:10px 0;
+}
+
+.card p{
+    color:#555;
+    margin-bottom:10px;
+}
+
+.delete-btn{
+    border:1px solid #ccc;
+    background:white;
+    padding:8px 15px;
+    border-radius:5px;
+    cursor:pointer;
+}
+</style>
 </head>
+
 <body>
 
-  <div class="container">
+<div class="navbar">
+    <h2>🛒 Product Store</h2>
 
-    <h1>Task Manager App</h1>
-    <form id="taskForm">
-      <input type="text" id="taskName" placeholder="Task Name" required />
+    <div class="nav-links">
+        <a href="#">Home</a>
+        <a href="#">Products</a>
+        <a href="#">About</a>
+    </div>
+</div>
 
-      <input type="text" id="taskDesc" placeholder="Description" required />
+<div class="container">
 
-      <button type="submit">Add Task</button>
-    </form>
-    <input type="text" id="filterInput" placeholder="Search Task..." />
-    <div id="taskList"></div>
-    <div class="weather-box">
-      <h2>Weather Feature</h2>
+    <input
+        type="text"
+        class="search"
+        placeholder="Search products by name..."
+        onkeyup="searchProducts(this.value)"
+    >
 
-      <input type="text" id="cityInput" placeholder="Enter City Name" />
+    <div class="form">
+        <h3>Add New Product</h3>
 
-      <button id="weatherBtn">Get Weather</button>
+        <div class="form-row">
+            <input type="text" id="name" placeholder="Product Name">
 
-      <div id="weatherResult"></div>
+            <input type="text" id="image" placeholder="Image URL">
+
+            <input type="number" id="price" placeholder="Price">
+
+            <button class="add-btn" onclick="addProduct()">
+                Add Product
+            </button>
+        </div>
     </div>
 
-  </div>
+    <h3 class="products-title">
+        All Products (<span id="count">5</span>)
+    </h3>
 
-  <script src="script.js"></script>
+    <div class="products" id="products"></div>
+
+</div>
+
+<script>
+let products = [
+{
+id:1,
+name:"iPhone 15",
+price:"79999",
+image:"https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=400"
+},
+{
+id:2,
+name:"Samsung S23",
+price:"69999",
+image:"https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400"
+},
+{
+id:3,
+name:"Apple iPad 10th Generation",
+price:"35,900",
+image:"https://macstation.co.in/wp-content/uploads/2025/06/314109_0_eirbpi.webp"
+},
+{
+id:4,
+name:"Sony WH-1000XM5",
+price:"29999",
+image:"https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400"
+},
+{
+id:5,
+name:"Apple Watch Series 9",
+price:"41999",
+image:"https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=400"
+}
+];
+
+function renderProducts(data){
+let container=document.getElementById("products");
+
+container.innerHTML="";
+
+data.forEach(product=>{
+container.innerHTML+=`
+<div class="card">
+<img src="${product.image}">
+<h4>${product.name}</h4>
+<p>₹${product.price}</p>
+
+<button class="delete-btn"
+onclick="deleteProduct(${product.id})">
+Delete
+</button>
+</div>
+`;
+});
+
+document.getElementById("count").innerText=data.length;
+}
+
+function addProduct(){
+
+let name=document.getElementById("name").value;
+let image=document.getElementById("image").value;
+let price=document.getElementById("price").value;
+
+if(!name || !image || !price){
+alert("Fill all fields");
+return;
+}
+
+products.push({
+id:Date.now(),
+name,
+image,
+price
+});
+
+renderProducts(products);
+
+document.getElementById("name").value="";
+document.getElementById("image").value="";
+document.getElementById("price").value="";
+}
+
+function deleteProduct(id){
+products=products.filter(p=>p.id!==id);
+renderProducts(products);
+}
+
+function searchProducts(text){
+
+let filtered=products.filter(product=>
+product.name.toLowerCase()
+.includes(text.toLowerCase())
+);
+
+renderProducts(filtered);
+}
+
+renderProducts(products);
+</script>
+
 </body>
 </html>
